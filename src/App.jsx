@@ -1,10 +1,15 @@
 import { useState, useRef, createContext, useContext, useLayoutEffect } from 'react';
 import {useImmer} from "use-immer";
+import {nanoid} from "nanoid";
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import logo from './assets/logo.png';
 import Dropdown from  "./components/Dropdown2/dropdown.jsx";
 import CountrySelect from "./components/countrySelect/countrySelect.jsx";
-import {initInvoiceData, InvoiceData, InvoiceItemData} from "./script.js"; // InvoiceData with capital "I" is a class
+import {initInvoiceData, InvoiceItemData} from "./script.js"; // InvoiceData with capital "I" is a class
+
+function updateLocalStorageInvoiceData(data){
+  localStorage.setItem("invoiceData", JSON.stringify(data))
+}
 
 export const invoiceDataContext = createContext();
 
@@ -44,10 +49,13 @@ function Main() {
 
 
 function InvoiceForm() {
-  const today = new Date().toISOString().split("T")[0];
+  const [activeRowId, setActiveRowId] = useState(null);
   const invoiceDataState = useContext(invoiceDataContext);
+  
+  const today = new Date().toISOString().split("T")[0];
+  
   return (
-    <div className="w-full flex items-center justify-center lg:flex-[0_0_50%] bg-white">
+    <div className="w-full flex items-center justify-center min-w-0 lg:flex-[0_1_50%] bg-white">
       <form className="w-full aspect-[210/279]  bg-green-600" >
       <div className="flex justify-between" >
         <img src="#" className=""/>
@@ -78,7 +86,7 @@ function InvoiceForm() {
       </div>
       <div className="w-full overflow-x-auto" >
         <div className="min-w-[360px]" >
-          <div className="grid grid-cols-[40%_20%_20%_20%_auto]">
+          <div className="grid grid-cols-[35%_20%_20%_20%_5%]">
             <span className="" >Item Description</span>
             <span className="text-right">Qty</span>
             <span className="text-right">Rate</span>
@@ -86,13 +94,14 @@ function InvoiceForm() {
             <span className="deleteItemBtn" ></span>
           </div>
           {invoiceDataState.invoiceData.items.map((item)=>(
-              <InvoiceItem key={item} description={item.description} qty={item.qty} rate={item.rate} />
+              <InvoiceItem id={item.id} key={item.id} description={item.description} qty={item.qty} rate={item.rate} activeRowId={activeRowId} setActiveRowId={setActiveRowId} />
             ))}
             <button className="bg-gray-600 active:bg-amber-600" onClick={(e)=>{
               e.preventDefault();
+              const newInvoiceItemID = nanoid();
               invoiceDataState.setInvoiceData(data =>{
-                data.items.push(new InvoiceItemData);
-                console.log(data)
+                data.items.push(new InvoiceItemData(newInvoiceItemID));
+                updateLocalStorageInvoiceData(data)
               })
             }} >Add Item</button>
         </div>
@@ -110,25 +119,40 @@ function InvoiceForm() {
 function InvoicePreview() {
   return(
     
-    <div className="w-0 flex items-center justify-center lg:flex-[0_0_50%] lg:p-10 bg-gray-500">
+    <div className="flex items-center justify-center lg:flex-[0_1_50%] lg:p-10 bg-gray-500">
       <div className="w-full aspect-[210/279]  bg-red-600" >
       </div>
     </div>
   )
 }
 
-function InvoiceItem({description, qty, rate}){
+function InvoiceItem({id, description, qty, rate, activeRowId, setActiveRowId}){
+  const invoiceDataState = useContext(invoiceDataContext);
+  
+  function handleClick(e){
+    const parentId = e.currentTarget.parentNode.id;
+    invoiceDataState.setInvoiceData(data =>{
+      e.preventDefault();
+      const index = data.items.findIndex(item => item.id === parentId);
+      if (index !== -1) data.items.splice(index, 1);
+      updateLocalStorageInvoiceData(data);
+    })
+    
+  }
+
   return(
-    <div className="grid grid-cols-[40%_20%_20%_20%_auto]">
+    <div id={id} className="grid grid-cols-[35%_20%_20%_20%_5%] invoiceItem" onClick={(e)=>{
+      setActiveRowId(e.currentTarget.id);
+    }}>
       <input type="text" placeholder="Enter Description" defaultValue={description}  />
       <input type="number" defaultValue={qty} className="text-right" />
       <input type="number" defaultValue={rate} className="text-right" />
-      <span className="text-center" >{(qty*rate).toFixed(2)}</span> 
-      <button className="" onClick={(e)=>{
-        e.preventDefault();
-        
-        
-      }}><XCircleIcon className="h-6 w-6 text-red-600" /></button>
+      <span className="text-right" >{(qty*rate).toFixed(2)}</span> 
+      
+      { id == activeRowId && (
+        <button onClick={handleClick} ><XCircleIcon className="h-6 w-6" /></button>
+        )
+      }
     </div>
   )
 }
