@@ -1,5 +1,5 @@
 export class InvoiceItemData {
-  constructor(id, description, qty=1, rate="0.00"){
+  constructor(id, description, qty=1, rate=0){
     this.id= id;
     this.description= description,
     this.qty= qty,
@@ -14,11 +14,11 @@ let invoiceDataTemplate = {
   companyName: "Your Company/Business",
   yourName: "Your Name",
   companyAddress: "Company Address",
-  cityStateZIP: "City, State ZIP",
+  cityState: "City, State ZIP",
   companyCountry: "",
   clientName: "Your Client's Name",
   clientAddress: "Client's Address",
-  clientCityStateZIP: "City, State ZIP",
+  clientCityState: "City, State ZIP",
   clientCountry: "Client's Country",
   items: [{ id: "example", description: "Web copy", qty: 3, rate: 200},],
   accountNumber: 987654321,
@@ -31,7 +31,7 @@ let invoiceDataTemplate = {
 let initInvoiceData;
 let localStorageInvoiceData = localStorage.getItem("invoiceData");
 
-if(localStorageInvoiceData ){
+if(localStorageInvoiceData){
   initInvoiceData = JSON.parse(localStorageInvoiceData);
 }else{
   initInvoiceData = invoiceDataTemplate;

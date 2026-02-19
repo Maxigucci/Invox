@@ -8,7 +8,7 @@ import CountrySelect from "./components/countrySelect/countrySelect.jsx";
 import {initInvoiceData, InvoiceItemData} from "./script.js"; // InvoiceData with capital "I" is a class
 
 function updateLocalStorageInvoiceData(data){
-  localStorage.setItem("invoiceData", JSON.stringify(data))
+  localStorage.setItem("invoiceData", JSON.stringify(data));
 }
 
 export const invoiceDataContext = createContext();
@@ -50,9 +50,37 @@ function Main() {
 
 function InvoiceForm() {
   const [activeRowId, setActiveRowId] = useState(null);
+  const [activeInputId, setActiveInputId] = useState(null);
+  
+  useLayoutEffect(()=>{
+    if(activeInputId){
+      const activeInput = document.getElementById(activeInputId);
+      //activeInput.focus();
+      console.log(activeInputId)
+    }
+  }, [activeInputId])
+  
+  
   const invoiceDataState = useContext(invoiceDataContext);
+  const invoiceData = invoiceDataState.invoiceData;
+  const invoiceDataItems = invoiceData.items;
   
   const today = new Date().toISOString().split("T")[0];
+  let subTotal = 0;
+  invoiceDataItems.forEach(item =>{
+    subTotal += (item.qty * item.rate)
+  })
+  //console.log(subTotal)
+  
+  function handleInputChange(e, id){
+    invoiceDataState.setInvoiceData(data =>{
+      data.id = e.target.value
+    })
+  }
+  
+  function handleInputFocus(e){
+    setActiveInputId(e.currentTarget.id)
+  }
   
   return (
     <div className="w-full flex items-center justify-center min-w-0 lg:flex-[0_1_50%] bg-white">
@@ -62,26 +90,26 @@ function InvoiceForm() {
         <span className="">INVOICE</span>
       </div>
       <div>
-        <input className="block" placeholder="Your Company/Business" />
-        <input className="block" placeholder="Company/Business Address" />
-        <input className="block" placeholder="City, State" />
+        <input id="companyName" className="block" placeholder="Your Company/Business" onFocus={handleInputFocus} />
+        <input id="companyAddress" className="block" placeholder="Company/Business Address" onFocus={handleInputFocus} />
+        <input id="cityState" className="block" placeholder="City, State" onFocus={handleInputFocus} />
         <CountrySelect />
       </div>
       <div className="flex justify-between flex-wrap" >
         <div className="flex flex-col">
           <h3>Bill To</h3>
-          <input placeholder="Your Client's Name " />
-          <input placeholder="Client's Address" />
-          <input placeholder="City, State" />
+          <input id="clientName" placeholder="Your Client's Name" onFocus={handleInputFocus} />
+          <input id="clientAddress" placeholder="Client's Address" onFocus={handleInputFocus} />
+          <input id="clientCityState" placeholder="City, State" onFocus={handleInputFocus} />
           <CountrySelect />
         </div>
         <div className="flex flex-col" >
-          <label for="invoiceNumber">Invoice Number</label>
-          <input id="invoiceNumber" placeholder="INV-098" />
-          <label for="invoiceDate">Invoice Date</label>
-          <input id="invoiceDate" type="date" defaultValue={today} />
-          <label for="dueDate">Due Date</label>
-          <input id="dueDate" type="date" defaultValue={today} />
+          <label htmlFor="invoiceNumber">Invoice Number</label>
+          <input id="invoiceNumber" placeholder="INV-098" onFocus={handleInputFocus} />
+          <label htmlFor="invoiceDate">Invoice Date</label>
+          <input id="invoiceDate" type="date" defaultValue={today} onFocus={handleInputFocus} />
+          <label htmlFor="dueDate">Due Date</label>
+          <input id="dueDate" type="date" defaultValue={today} onFocus={handleInputFocus} />
         </div>
       </div>
       <div className="w-full overflow-x-auto" >
@@ -94,16 +122,41 @@ function InvoiceForm() {
             <span className="deleteItemBtn" ></span>
           </div>
           {invoiceDataState.invoiceData.items.map((item)=>(
-              <InvoiceItem id={item.id} key={item.id} description={item.description} qty={item.qty} rate={item.rate} activeRowId={activeRowId} setActiveRowId={setActiveRowId} />
+              <InvoiceItem id={item.id} key={item.id} description={item.description} qty={item.qty} rate={item.rate} activeRowId={activeRowId} setActiveRowId={setActiveRowId} activeInputId={activeInputId} setActiveInputId={setActiveInputId} handleInputFocus={handleInputFocus} />
             ))}
-            <button className="bg-gray-600 active:bg-amber-600" onClick={(e)=>{
-              e.preventDefault();
-              const newInvoiceItemID = nanoid();
-              invoiceDataState.setInvoiceData(data =>{
-                data.items.push(new InvoiceItemData(newInvoiceItemID));
-                updateLocalStorageInvoiceData(data)
-              })
-            }} >Add Item</button>
+            
+        </div>
+        <div className="">
+          <button className="bg-gray-600 active:bg-amber-600" onClick={(e)=>{
+            e.preventDefault();
+            const newInvoiceItemID = nanoid();
+            invoiceDataState.setInvoiceData(data =>{
+              data.items.push(new InvoiceItemData(newInvoiceItemID));
+             updateLocalStorageInvoiceData(data)
+            })
+          }} >Add Item</button>
+          <div className="">
+            <div >
+            <span className="">Sub Total</span>
+            <span id="subTotal">{
+              ""
+            }</span>
+            </div>
+            <div >
+              <label htmlFor="discountPercent" >Discoint(%)</label>
+              <input id="discountPercent" type="num" placeholder="0" onFocus={handleInputFocus}/>
+            </div>
+            <div >
+              <label htmlFor="taxPercent" >Tax(%)</label>
+              <input id="taxPercent" type="num" placeholder="0" onFocus={handleInputFocus} />
+            </div>
+            <div >
+              <span >TOTAL</span>
+              <span >{
+                ""
+              }</span>
+            </div>
+          </div>
         </div>
       </div>
       <div ></div>
@@ -126,7 +179,7 @@ function InvoicePreview() {
   )
 }
 
-function InvoiceItem({id, description, qty, rate, activeRowId, setActiveRowId}){
+function InvoiceItem({id, description, qty, rate, activeRowId, setActiveRowId, activeInputId, setActiveInputId, handleInputFocus}){
   const invoiceDataState = useContext(invoiceDataContext);
   
   function handleClick(e){
@@ -144,9 +197,9 @@ function InvoiceItem({id, description, qty, rate, activeRowId, setActiveRowId}){
     <div id={id} className="grid grid-cols-[35%_20%_20%_20%_5%] invoiceItem" onClick={(e)=>{
       setActiveRowId(e.currentTarget.id);
     }}>
-      <input type="text" placeholder="Enter Description" defaultValue={description}  />
-      <input type="number" defaultValue={qty} className="text-right" />
-      <input type="number" defaultValue={rate} className="text-right" />
+      <input id={`${id}-description`} type="text" placeholder="Enter Description" defaultValue={description} onFocus={handleInputFocus}  />
+      <input id={`${id}-qty`} type="number" defaultValue={qty} className="text-right" onFocus={handleInputFocus} />
+      <input id={`${id}-rate`} type="number" defaultValue={rate} className="text-right" onFocus={handleInputFocus} />
       <span className="text-right" >{(qty*rate).toFixed(2)}</span> 
       
       { id == activeRowId && (
