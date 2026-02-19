@@ -84,7 +84,7 @@ function InvoiceForm() {
   
   return (
     <div className="w-full flex items-center justify-center min-w-0 lg:flex-[0_1_50%] bg-white">
-      <form className="w-full aspect-[210/279]  bg-blue-600" >
+      <form className="w-full aspect-[210/279]  bg-gray-600" >
       <div className="flex justify-between" >
         <img src="#" className=""/>
         <span className="">INVOICE</span>
