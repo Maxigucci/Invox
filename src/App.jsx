@@ -30,7 +30,7 @@ export default function App() {
 
 function Main() {
   return (
-    <div className="w-full flex-1 flex flex-col bg-green-500" >
+    <div className="w-full flex-1 flex flex-col bg-blue-500" >
       <div className="overflow-x-scroll" >
         <ul className="flex gap-4 list-none p-0 m-0" >
           <li><button className="focus:text-gray-500" >New</button></li>
@@ -84,7 +84,7 @@ function InvoiceForm() {
   
   return (
     <div className="w-full flex items-center justify-center min-w-0 lg:flex-[0_1_50%] bg-white">
-      <form className="w-full aspect-[210/279]  bg-green-600" >
+      <form className="w-full aspect-[210/279]  bg-blue-600" >
       <div className="flex justify-between" >
         <img src="#" className=""/>
         <span className="">INVOICE</span>
