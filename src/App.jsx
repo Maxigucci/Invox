@@ -19,7 +19,7 @@ export default function App() {
   return (
     <invoiceDataContext.Provider value={{invoiceData, setInvoiceData}}>
     <div id="page">
-      <div className="" ><img src={logo} /></div>
+      <div className="w-full flex" ><img src={logo} className="bg-gray-600" /></div>
       <Main />
       <div className="w-full" ><Footer /></div>
     </div>
@@ -172,7 +172,7 @@ function InvoiceForm() {
 function InvoicePreview() {
   return(
     
-    <div className="flex items-center justify-center lg:flex-[0_1_50%] lg:p-10 bg-gray-500">
+    <div className=" flex items-center justify-center lg:flex-[0_1_50%] lg:p-10 bg-gray-500">
       <div className="w-full aspect-[210/279]  bg-red-600" >
       </div>
     </div>
