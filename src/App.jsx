@@ -2,7 +2,8 @@ import { useState, useRef, createContext, useContext, useLayoutEffect } from 're
 import {useImmer} from "use-immer";
 import {nanoid} from "nanoid";
 import { XCircleIcon } from '@heroicons/react/24/outline';
-import logo from './assets/logo.png';
+import logo from './assets/surebill.png';
+import logoPlaceholder from './assets/logo_placeholder.png';
 import Dropdown from  "./components/Dropdown2/dropdown.jsx";
 import CountrySelect from "./components/countrySelect/countrySelect.jsx";
 import {initInvoiceData, InvoiceItemData} from "./script.js"; // InvoiceData with capital "I" is a class
@@ -47,6 +48,25 @@ function Main() {
   )
 }
 
+function LogoPlaceholder(){
+  const [preview, setPreview] = useState(logoPlaceholder);
+
+  function handleChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  }
+  return (
+    <div className="bg-red-700 max-w-[clamp(0%,200px,50%)] cursor-pointer active:scale-95 active:border-blue-500" >
+    <label htmlFor="logo" className="block" >
+      <img src={preview} alt="Upload logo" className="h-auto max-h-[100px] max-w-full object-cover" />
+    </label>
+    <input id="logo" type="file" accept="image/*" hidden  onChange={handleChange} />
+    </div>
+  )
+}
+
 
 function InvoiceForm() {
   const [activeRowId, setActiveRowId] = useState(null);
@@ -83,11 +103,12 @@ function InvoiceForm() {
   }
   
   return (
-    <div className="w-full flex items-center justify-center min-w-0 lg:flex-[0_1_50%] bg-white">
-      <form className="w-full aspect-[210/279]  bg-gray-600" >
+    <div className="w-full flex items-center justify-center min-w-0 lg:flex-[0_1_50%] bg-white 
+    ">
+      <form className="w-full aspect-[210/279] bg-gray-600 lg:p-4" >
       <div className="flex justify-between" >
-        <img src="#" className=""/>
-        <span className="">INVOICE</span>
+        <LogoPlaceholder />
+        <span className="text-2xl">INVOICE</span>
       </div>
       <div>
         <input id="companyName" className="block" placeholder="Your Company/Business" onFocus={handleInputFocus} />
